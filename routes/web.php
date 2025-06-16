@@ -9,10 +9,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -28,7 +24,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/category', [CategoryController::class, 'create'])->name('category.create');
     Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
-
+    Route::get('/category/{id}', [BoardController::class, 'edit'])->name('category.edit');
+    Route::put('/category/{id}', [BoardController::class, 'update'])->name('board.update');
+    Route::delete('/category/{id}', [BoardController::class, 'destroy'])->name('category.destroy');
 });
 
 require __DIR__.'/auth.php';

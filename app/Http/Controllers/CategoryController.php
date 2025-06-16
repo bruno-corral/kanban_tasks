@@ -10,75 +10,71 @@ use Illuminate\Support\Facades\Redirect;
 
 class CategoryController extends Controller
 {
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // return Auth::user()->boards()->with('categories.tasks')->get();
+        $categories = Category::query()
+            ->where('board_id', Auth::id())
+            ->get();
 
-        // $board = Board::all();
-        // return $board->load('categories.tasks');
+        return view('dashboard', compact('categories'));
     }
 
-    public function create(Request $request)
+    public function create()
     {
         return view('category.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string'
+            'name' => 'required|string',
         ]);
 
         $data = [
             'name' => trim($request->input('name')),
-            'board_id' => Auth::id()
+            'board_id' => Auth::id(),
         ];
-
-        // dd($data);
 
         Category::create($data);
 
         return Redirect::route('board.show');
     }
 
-//     /**
-//      * Display the specified resource.
-//      */
-//    public function show(Category $category)
-//     {
-//         // $this->authorize('view', $board);
-//         return $category->load('categories.tasks');
-//     }
+    public function show($id)
+    {
+        return Category::findOrFail($id);
+    }
 
-//     /**
-//      * Update the specified resource in storage.
-//      */
-//     public function update(Request $request, Category $board)
-//     {
-//         // $this->authorize('update', $board);
-//         $request->validate([
-//             'title' => 'required|string'
-//         ]);
+    public function edit($id)
+    {
+        $category = $this->show($id);
 
-//         $board->update($request->only('title'));
-//         return $board;
-//     }
+        return view('category.edit', compact('category'));
+    }
 
-//     /**
-//      * Remove the specified resource from storage.
-//      */
-//     public function destroy(Board $board)
-//     {
-//         // $this->authorize('delete', $board);
+    public function update(Request $request, $id)
+    {
+        $category = $this->show($id);
 
-//         $board->delete();
-//         return response()->noContent();
-//     }
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        $data = [
+            'name' => trim($request->input('name')),
+            'board_id' => Auth::id()
+        ];
+
+        $category->update($data);
+
+        return Redirect::route('board.show');
+    }
+
+    public function destroy($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->delete();
+
+        return Redirect::route('board.show');
+    }
 }
